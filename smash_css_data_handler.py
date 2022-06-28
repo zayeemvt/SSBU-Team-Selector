@@ -1,3 +1,5 @@
+import os
+
 import json
 from enum import Enum
 
@@ -17,7 +19,17 @@ class Character:
         self.team = team
     
 
-def generateCharacterData(in_file: str, out_file: str) -> list[Character]:
+def saveCharacterData(filepath: os.PathLike, character_list: list[Character]) -> None:
+    with open(filepath, 'w') as f:
+        data = []
+
+        for character in character_list:
+            data.append({"name":character.name, "team": character.team.value})
+
+        json.dump(data, f, indent=2, ensure_ascii=False)
+
+
+def generateCharacterData(in_file: os.PathLike, out_file: os.PathLike) -> list[Character]:
     with open(in_file) as f:
         name_list = json.load(f)
 
@@ -26,12 +38,17 @@ def generateCharacterData(in_file: str, out_file: str) -> list[Character]:
     for name in name_list:
         character_list.append(Character(name, TeamColor.NONE))
 
-    with open(out_file, 'w') as f:
-        json.dump(character_list, f, indent=2)
+    saveCharacterData(out_file, character_list)
+
+    return character_list
 
 
 def loadCharacterData(filepath: str) -> list[Character]:
     with open(filepath) as f:
-        character_list = json.load(f)
+        data = json.load(f)
+
+    character_list = []
+    for character in data:
+        character_list.append(Character(character["name"], character["team"]))
 
     return character_list
