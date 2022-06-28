@@ -1,17 +1,27 @@
-from smash_css_data_handler import loadCharacters
+import os
+
+from smash_css_data_handler import loadCharacterData
 from smash_css_icon_generator import getIcons, createImageGrid
 
 GRID_WIDTH = 13
 
+CHAR_NAME_PATH = "characters.json"
+CHAR_DATA_PATH = "data.json"
+ICON_PATH = "Images/Stock Icons/"
+
 if __name__ == '__main__':
-    chars_filepath = "characters.json"
+    print("Setting current working directory...")
+    try:
+        dirname = os.path.dirname(__file__)
+    except:
+        print("Could not set current working directory")
 
-    character_list = loadCharacters(chars_filepath)
+    name_path = os.path.join(dirname, CHAR_NAME_PATH)
+    character_list = loadCharacterData(name_path)
 
-    # Iterating through the json
-    # list
     for idx, name in enumerate(character_list, 1):
         print(str(idx) + ": " + name)
 
-    img_list = getIcons(character_list)
+    icons_path = os.path.join(dirname, ICON_PATH)
+    img_list = getIcons(icons_path, character_list)
     createImageGrid(img_list, int(len(img_list)/GRID_WIDTH) + 1, GRID_WIDTH).show()

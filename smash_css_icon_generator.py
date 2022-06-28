@@ -1,11 +1,13 @@
+import os
+
 from PIL import Image
 
-def getIcons(character_list: list[str]) -> list[Image.Image]:
+def getIcons(img_dir: os.PathLike, character_list: list[str]) -> list[Image.Image]:
     img_list = []
 
     for name in character_list:
         file_name = name.replace("/"," ")
-        img_list.append(Image.open("Images/Stock Icons/" + file_name + '.png'))
+        img_list.append(Image.open(os.path.join(img_dir, file_name + ".png")))
 
     return img_list
 
