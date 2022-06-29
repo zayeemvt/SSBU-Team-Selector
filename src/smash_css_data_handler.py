@@ -17,10 +17,10 @@ class Character:
 
     def __init__(self, name: str, team: TeamColor) -> None:
         self.name = name
-        self.team = team.value
+        self.team = team
 
     def changeTeam(self, team: TeamColor) -> None:
-        self.team = team.value
+        self.team = team
     
 
 def saveCharacterData(out_file: os.PathLike, character_list: list[Character]) -> None:
@@ -31,7 +31,7 @@ def saveCharacterData(out_file: os.PathLike, character_list: list[Character]) ->
         data = []
 
         for character in character_list:
-            data.append({"name":character.name, "team": character.team})
+            data.append({"name":character.name, "team": character.team.value})
 
         json.dump(data, f, indent=2, ensure_ascii=False)
 
@@ -63,6 +63,6 @@ def loadCharacterData(in_file: str) -> list[Character]:
 
     character_list = []
     for character in data:
-        character_list.append(Character(character["name"], character["team"]))
+        character_list.append(Character(character["name"], TeamColor(character["team"])))
 
     return character_list

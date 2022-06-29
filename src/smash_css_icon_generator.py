@@ -36,3 +36,7 @@ def createImageGrid(imgs: list[Image.Image], rows: int, cols: int) -> list[Image
             grid.paste(img, box=(i%cols*w, i//cols*h))
 
     return grid
+
+def saveImageGrid(out_file: os.PathLike, grid: list[Image.Image]) -> None:
+    grid.save(out_file)
+    return
