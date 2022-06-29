@@ -11,16 +11,23 @@ class TeamColor(Enum):
     YELLOW = 4
 
 class Character:
+    """
+    A class that represents a selectable character
+    """
+
     def __init__(self, name: str, team: TeamColor) -> None:
         self.name = name
         self.team = team
 
-    def changeTeams(self, team: TeamColor) -> None:
+    def changeTeam(self, team: TeamColor) -> None:
         self.team = team
     
 
-def saveCharacterData(filepath: os.PathLike, character_list: list[Character]) -> None:
-    with open(filepath, 'w') as f:
+def saveCharacterData(out_file: os.PathLike, character_list: list[Character]) -> None:
+    """
+    Saves the state of the application in the JSON file specified by out_file.
+    """
+    with open(out_file, 'w') as f:
         data = []
 
         for character in character_list:
@@ -30,6 +37,10 @@ def saveCharacterData(filepath: os.PathLike, character_list: list[Character]) ->
 
 
 def generateCharacterData(in_file: os.PathLike, out_file: os.PathLike) -> list[Character]:
+    """
+    Makes a new JSON file with character data (specified by out_file), using the list
+    of names from the JSON file specified by in_file.
+    """
     with open(in_file) as f:
         name_list = json.load(f)
 
@@ -43,8 +54,11 @@ def generateCharacterData(in_file: os.PathLike, out_file: os.PathLike) -> list[C
     return character_list
 
 
-def loadCharacterData(filepath: str) -> list[Character]:
-    with open(filepath) as f:
+def loadCharacterData(in_file: str) -> list[Character]:
+    """
+    Loads previously saved data from the JSON file specified by in_file.
+    """
+    with open(in_file) as f:
         data = json.load(f)
 
     character_list = []

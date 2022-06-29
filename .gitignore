@@ -1,5 +1,9 @@
 # Project-specific excludes
-data.json
+Output/data.json
+Output/red_team.png
+Output/blue_team.png
+Output/green_team.png
+Output/yellow_team.png
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
