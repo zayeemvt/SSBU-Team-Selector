@@ -1,12 +1,16 @@
 import os
 
-from tkinter import *
-from tkinter.ttk import *
+import tkinter as tk
+from PIL import ImageTk
 
 from smash_css_data_handler import TeamColor, generateCharacterData, loadCharacterData
-from smash_css_icon_generator import getIcons, createImageGrid, saveImageGrid
+from smash_css_icon_generator import loadImage, getIcons, createImageGrid, saveImageGrid
 
+BUTTON_GRID_WIDTH = 13
 ICON_GRID_WIDTH = 13
+
+PORTRAIT_WIDTH = int(454/4)
+PORTRAIT_HEIGHT = int(300/4)
 
 OUTPUT_DIR = "../Output/"
 
@@ -21,10 +25,24 @@ GREEN_PATH = OUTPUT_DIR + "green_team.png"
 YELLOW_PATH = OUTPUT_DIR + "yellow_team.png"
 NONE_PATH = OUTPUT_DIR + "no_team.png"
 
-class SmashCSS_GUI(Tk):
+def getColorCode(team: TeamColor) -> str:
+    if (team == TeamColor.RED):
+        return '#FF7F7F'
+    elif (team == TeamColor.BLUE):
+        return '#7F7FFF'
+    elif (team == TeamColor.GREEN):
+        return '#7FFF7F'
+    elif (team == TeamColor.YELLOW):
+        return '#FFFF7F'
+    else:
+        return 'SystemButtonFace'
+
+class SmashCSS_GUI(tk.Tk):
     def __init__(self) -> None:
         super().__init__()
         self.onStartup()
+        self.button_list = self.createButtons()
+
         self.output_dirs = [NONE_PATH, RED_PATH, BLUE_PATH, GREEN_PATH, YELLOW_PATH]
         self.updateImages()
 
@@ -66,10 +84,25 @@ class SmashCSS_GUI(Tk):
         except Exception as e:
             pass
 
+    def createButtons(self) -> list[tk.Button]:
+        button_list = []
+
+        for idx, c in enumerate(self.character_list):
+            portrait = loadImage(self.getPath(CSS_PATH), c.name)
+            portrait = portrait.resize((PORTRAIT_WIDTH,PORTRAIT_HEIGHT))
+            portrait.show()
+            portrait = ImageTk.PhotoImage(portrait)
+
+            button = tk.Button(self, text=c.name, image=portrait, compound="top", foreground='black', background=getColorCode(c.team))
+            button.grid(column=int(idx%BUTTON_GRID_WIDTH), row=int(idx/BUTTON_GRID_WIDTH))
+            button_list.append(button)
+
+        return button_list
+
     def getPath(self, path: str) -> os.PathLike:
         return os.path.join(self.dirname, path)
 
-    def updateImages(self):
+    def updateImages(self) -> None:
         for team_color in TeamColor:
             draw_list = [c for c in self.character_list if c.team == team_color]
             img_list = getIcons(self.getPath(ICON_PATH), draw_list)

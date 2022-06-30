@@ -4,6 +4,14 @@ from PIL import Image
 
 from smash_css_data_handler import Character
 
+def replaceSpecialChars(file_name: str) -> str:
+    file_name = file_name.replace("/"," ") # Replaces forward slash with space
+    return file_name
+
+def loadImage(img_dir: os.PathLike, file_name: str) -> Image.Image:
+    file_name = replaceSpecialChars(file_name)
+    return Image.open(os.path.join(img_dir, file_name + ".png"))
+
 def getIcons(img_dir: os.PathLike, character_list: list[Character]) -> list[Image.Image]:
     """
     Generates a list of output images from the specified character_list. These
@@ -15,8 +23,7 @@ def getIcons(img_dir: os.PathLike, character_list: list[Character]) -> list[Imag
     img_list = []
 
     for character in character_list:
-        file_name = character.name.replace("/"," ") # Replaces forward slash with space
-        img_list.append(Image.open(os.path.join(img_dir, file_name + ".png")))
+        img_list.append(loadImage(img_dir, character.name))
 
     return img_list
 
