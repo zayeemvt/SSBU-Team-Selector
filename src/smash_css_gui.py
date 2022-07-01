@@ -3,7 +3,7 @@ import os
 import tkinter as tk
 from PIL import Image, ImageTk
 
-from smash_css_data_handler import Character, TeamColor, generateCharacterData, loadCharacterData
+from smash_css_data_handler import Character, TeamColor, generateCharacterData, loadCharacterData, saveCharacterData
 from smash_css_icon_generator import loadImage, getIcons, createImageGrid, saveImageGrid
 
 BUTTON_GRID_WIDTH = 13
@@ -27,6 +27,8 @@ BLUE_PATH = OUTPUT_DIR + "blue_team.png"
 GREEN_PATH = OUTPUT_DIR + "green_team.png"
 YELLOW_PATH = OUTPUT_DIR + "yellow_team.png"
 NONE_PATH = OUTPUT_DIR + "no_team.png"
+
+DEFAULT_TEAMS = ["Red", "Blue"]
 
 def getColorCode(team: TeamColor) -> str:
     if (team == TeamColor.RED):
@@ -79,8 +81,12 @@ class SmashCSS_GUI(tk.Tk):
         self.button_list = self.createButtons()
         self.buttons_frame.grid(column=0, row=1)
 
+        self.check_frame = tk.Frame(self)
+        self.check_list = self.createCheckboxes()
+        self.check_frame.grid(column=0, row=2, pady=(5,5))
+
         self.update_btn = tk.Button(self, text="Update", command=self.saveData, padx=50, pady=10, font=("Helvetica", "16"), bd=5) 
-        self.update_btn.grid(column=0, row=2, pady=20)
+        self.update_btn.grid(column=0, row=3, pady=(5,10))
 
         self.output_dirs = [NONE_PATH, RED_PATH, BLUE_PATH, GREEN_PATH, YELLOW_PATH]
 
@@ -131,6 +137,23 @@ class SmashCSS_GUI(tk.Tk):
 
         return button_list
 
+    def createCheckboxes(self) -> list[tk.Checkbutton]:
+        self.check_label = tk.Label(self.check_frame, text="Teams:", font=("Helvetica","12"))
+        self.check_label.grid(column=0, row=0)
+
+        button_list = []
+        team_list = ["Unselected", "Red", "Blue", "Green", "Yellow"]
+        self.check_vars = [tk.IntVar() for x in team_list]
+
+        for idx, team in enumerate(team_list):
+            button = tk.Checkbutton(self.check_frame, text=team, variable=self.check_vars[idx], font=("Helvetica","12"))
+            if team in DEFAULT_TEAMS:
+                button.select()
+            button.grid(column=idx+1, row=0)
+            button_list.append(button)
+
+        return button_list
+
     def getPath(self, path: str) -> os.PathLike:
         return os.path.join(self.dirname, path)
 
@@ -142,4 +165,8 @@ class SmashCSS_GUI(tk.Tk):
             saveImageGrid(self.getPath(self.output_dirs[team_color.value]), output)
 
     def saveData(self) -> None:
-        pass
+        for idx, c in enumerate(self.character_list):
+            self.character_list[idx].team = self.button_list[idx].data.team
+
+        self.updateImages()
+        saveCharacterData(self.getPath(CHAR_DATA_PATH), self.character_list)
