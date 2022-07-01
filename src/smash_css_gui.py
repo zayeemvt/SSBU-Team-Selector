@@ -1,13 +1,16 @@
 import os
 
 import tkinter as tk
-from PIL import ImageTk
+from PIL import Image, ImageTk
 
-from smash_css_data_handler import TeamColor, generateCharacterData, loadCharacterData
+from smash_css_data_handler import Character, TeamColor, generateCharacterData, loadCharacterData
 from smash_css_icon_generator import loadImage, getIcons, createImageGrid, saveImageGrid
 
 BUTTON_GRID_WIDTH = 13
 ICON_GRID_WIDTH = 13
+
+BUTTON_SPACING_X = 1
+BUTTON_SPACING_Y = 1
 
 PORTRAIT_WIDTH = int(454/4)
 PORTRAIT_HEIGHT = int(300/4)
@@ -37,14 +40,49 @@ def getColorCode(team: TeamColor) -> str:
     else:
         return 'SystemButtonFace'
 
+class Character_Button(tk.Label):
+    def __init__(self, root: tk.Frame, data: Character, idx: int, img: Image.Image) -> None:
+        self.data = data
+
+        self.portrait = img
+        self.portrait = self.portrait.resize((PORTRAIT_WIDTH,PORTRAIT_HEIGHT))
+        self.portrait = ImageTk.PhotoImage(self.portrait)
+
+        super().__init__(root, text=data.name, image=self.portrait, compound="top", foreground='black', background=getColorCode(data.team), relief="solid")
+        self.grid(column=int(idx%BUTTON_GRID_WIDTH), row=int(idx/BUTTON_GRID_WIDTH), padx=BUTTON_SPACING_X, pady=BUTTON_SPACING_Y)
+
+        self.bind('<Button-1>', self.onLeftClick)
+        self.bind('<Button-2>', self.onRightClick)
+        self.bind('<Button-3>', self.onRightClick)
+
+    def onLeftClick(self, event):
+        new_team = (self.data.team.value + 1) % 5
+        self.data.changeTeam(TeamColor(new_team))
+        self.configure(background=getColorCode(self.data.team))
+
+    def onRightClick(self, event):
+        new_team = (self.data.team.value + 4) % 5
+        self.data.changeTeam(TeamColor(new_team))
+        self.configure(background=getColorCode(self.data.team))
+
+
+
 class SmashCSS_GUI(tk.Tk):
     def __init__(self) -> None:
         super().__init__()
         self.onStartup()
+        
+        self.app_label = tk.Label(self, text="SSBU Team Selector Tool", font=("Helvetica", "32", "bold"), justify="center")
+        self.app_label.grid(column=0, row=0)
+
+        self.buttons_frame = tk.Frame(self)
         self.button_list = self.createButtons()
+        self.buttons_frame.grid(column=0, row=1)
+
+        self.update_btn = tk.Button(self, text="Update", command=self.saveData, padx=50, pady=10, font=("Helvetica", "16"), bd=5) 
+        self.update_btn.grid(column=0, row=2, pady=20)
 
         self.output_dirs = [NONE_PATH, RED_PATH, BLUE_PATH, GREEN_PATH, YELLOW_PATH]
-        self.updateImages()
 
     def onStartup(self) -> None:
         print("Setting current working directory...")
@@ -88,13 +126,7 @@ class SmashCSS_GUI(tk.Tk):
         button_list = []
 
         for idx, c in enumerate(self.character_list):
-            portrait = loadImage(self.getPath(CSS_PATH), c.name)
-            portrait = portrait.resize((PORTRAIT_WIDTH,PORTRAIT_HEIGHT))
-            portrait.show()
-            portrait = ImageTk.PhotoImage(portrait)
-
-            button = tk.Button(self, text=c.name, image=portrait, compound="top", foreground='black', background=getColorCode(c.team))
-            button.grid(column=int(idx%BUTTON_GRID_WIDTH), row=int(idx/BUTTON_GRID_WIDTH))
+            button = Character_Button(self.buttons_frame, c, idx, loadImage(self.getPath(CSS_PATH), c.name))
             button_list.append(button)
 
         return button_list
@@ -108,3 +140,6 @@ class SmashCSS_GUI(tk.Tk):
             img_list = getIcons(self.getPath(ICON_PATH), draw_list)
             output = createImageGrid(img_list, int(len(img_list)/ICON_GRID_WIDTH) + 1, ICON_GRID_WIDTH)
             saveImageGrid(self.getPath(self.output_dirs[team_color.value]), output)
+
+    def saveData(self) -> None:
+        pass
