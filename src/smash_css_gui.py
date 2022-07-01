@@ -158,7 +158,13 @@ class SmashCSS_GUI(tk.Tk):
         return os.path.join(self.dirname, path)
 
     def updateImages(self) -> None:
-        for team_color in TeamColor:
+        team_list = []
+
+        for idx, v in enumerate(self.check_vars):
+            if v.get() == 1:
+                team_list.append(TeamColor(idx))
+
+        for team_color in team_list:
             draw_list = [c for c in self.character_list if c.team == team_color]
             img_list = getIcons(self.getPath(ICON_PATH), draw_list)
             output = createImageGrid(img_list, int(len(img_list)/ICON_GRID_WIDTH) + 1, ICON_GRID_WIDTH)
