@@ -5,10 +5,20 @@ from PIL import Image
 from smash_css_data_handler import Character
 
 def replaceSpecialChars(file_name: str) -> str:
+    """
+    Replaces any special characters in the character file_name with a file-name-
+    compatible character.
+    """
+
     file_name = file_name.replace("/"," ") # Replaces forward slash with space
     return file_name
 
 def loadImage(img_dir: os.PathLike, file_name: str) -> Image.Image:
+    """
+    Returns a PIL image of the desired file_name in the specified img_dir path,
+    in PNG format.
+    """
+
     file_name = replaceSpecialChars(file_name)
     return Image.open(os.path.join(img_dir, file_name + ".png"))
 
@@ -20,6 +30,7 @@ def getIcons(img_dir: os.PathLike, character_list: list[Character]) -> list[Imag
     special characters that can't be used in file names will have that special
     character replaced by a blank space.
     """
+
     img_list = []
 
     for character in character_list:
@@ -29,11 +40,15 @@ def getIcons(img_dir: os.PathLike, character_list: list[Character]) -> list[Imag
 
 def createImageGrid(imgs: list[Image.Image], rows: int, cols: int) -> list[Image.Image]:
     """
-    Creates a grid of output images specified by imgs, with size cols by rows.
+    Creates a grid of output images specified by imgs, with dimensions cols * rows.
+    Each image must have equal dimensions for best results.
     """
+
+    # Get the image size in pixels
     if (len(imgs) != 0):
         w, h = imgs[0].size
     else:
+        # Arbitrary numbers, since the output image will be blank anyway
         w = 64
         h = 64
     grid = Image.new('RGBA', size=(cols*w, rows*h))
@@ -45,5 +60,9 @@ def createImageGrid(imgs: list[Image.Image], rows: int, cols: int) -> list[Image
     return grid
 
 def saveImageGrid(out_file: os.PathLike, grid: list[Image.Image]) -> None:
+    """
+    Saves grid of images at specified out_file location.
+    """
+    
     grid.save(out_file)
     return
