@@ -3,10 +3,10 @@ A Python 3.9.5 Tkinter application that generates image grids of character icons
 
 ## Setup
 ### For users
-The executable will be located in the `dist` folder. Run the `SSBU Team Selector.exe` file to launch the GUI. This will create an `Output` folder in the same directory as the executable.
+Download the file as a .ZIP by clicking on the green "Code" button on GitHub and selecting "Download as ZIP". Once the download is complete, unzip the archive and place the folder in your desire location. The executable will be located in the `dist` folder. Run the `SSBU Team Selector.exe` file to launch the GUI. This will create an `Output` folder in the same directory as the executable.
 
 ### For developers
-All source code is in the `src` directory. The `smash_css_main.py` file is the entry point into the application. All other files are supplementary to help modularize the code.
+Clone the repository or create a fork. All source code is in the `src` directory. The `smash_css_main.py` file is the entry point into the application. All other files are supplementary to help modularize the code.
 
 Modules used:
 * PIL
