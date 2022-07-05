@@ -9,8 +9,10 @@ def replaceSpecialChars(file_name: str) -> str:
     Replaces any special characters in the character file_name with a file-name-
     compatible character.
     """
-
-    file_name = file_name.replace("/"," ") # Replaces forward slash with space
+    special_chars = ["\\", "/", ":", "*", "?", "<", ">", "|"]
+    for char in special_chars:
+        file_name = file_name.replace(char," ")
+    
     return file_name
 
 def loadImage(img_dir: os.PathLike, file_name: str) -> Image.Image:
@@ -63,6 +65,6 @@ def saveImageGrid(out_file: os.PathLike, grid: list[Image.Image]) -> None:
     """
     Saves grid of images at specified out_file location.
     """
-    
+
     grid.save(out_file)
     return
