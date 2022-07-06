@@ -36,6 +36,7 @@ def saveCharacterData(out_file: os.PathLike, character_list: list[Character]) ->
             data.append({"name":character.name, "team": character.team.value})
 
         json.dump(data, f, indent=2, ensure_ascii=False)
+        print("Character data saved.")
 
 
 def generateCharacterData(in_file: os.PathLike, out_file: os.PathLike) -> list[Character]:
@@ -63,7 +64,7 @@ def loadCharacterData(in_file: str) -> list[Character]:
     """
     Loads previously saved data from the JSON file specified by in_file.
     """
-    
+
     with open(in_file) as f:
         data = json.load(f)
 
