@@ -1,6 +1,7 @@
 import os
 
 import tkinter as tk
+import json
 from PIL import Image, ImageTk
 
 from smash_css_data_handler import Character, TeamColor, generateCharacterData, loadCharacterData, saveCharacterData
@@ -8,7 +9,10 @@ from smash_css_icon_generator import loadImage, getIcons, createImageGrid, saveI
 
 # Constants
 BUTTON_GRID_WIDTH = 13
-ICON_GRID_WIDTH = 13
+
+DEFAULT_ICON_GRID_WIDTH = 13
+MIN_ICON_GRID_WIDTH = 1
+MAX_ICON_GRID_WIDTH = 30
 
 BUTTON_SPACING_X = 1
 BUTTON_SPACING_Y = 1
@@ -28,6 +32,8 @@ BLUE_PATH = OUTPUT_DIR + "blue_team.png"
 GREEN_PATH = OUTPUT_DIR + "green_team.png"
 YELLOW_PATH = OUTPUT_DIR + "yellow_team.png"
 NONE_PATH = OUTPUT_DIR + "no_team.png"
+
+SETTINGS_PATH = OUTPUT_DIR + "settings.json"
 
 DEFAULT_TEAMS = ["Red", "Blue"]
 
@@ -124,9 +130,19 @@ class SmashCSS_GUI(tk.Tk):
         self.check_list = self.createCheckboxes()
         self.check_frame.grid(column=0, row=2, pady=(5,5))
 
+        # Output image width adjustment box
+        self.settings_frame = tk.Frame(self)
+        self.icon_width_label = tk.Label(self.settings_frame, text="Icon Grid Width:", font=("Helvetica","12"))
+        self.icon_width_label.grid(column=0, row=0)
+        self.icon_width_var = tk.StringVar(self.settings_frame, value=self.icon_grid_width)
+        self.icon_width_box = tk.Spinbox(self.settings_frame, textvariable=self.icon_width_var, from_=MIN_ICON_GRID_WIDTH, to=MAX_ICON_GRID_WIDTH, width=5)
+        self.icon_width_box.grid(column=1, row=0)
+        self.icon_width_var.trace("w",lambda a, b, c, arg="icon_width": self.updateSettings(arg))
+        self.settings_frame.grid(column=0,row=3, pady=(0,5))
+
         # Update button
         self.update_btn = tk.Button(self, text="Update", command=self.saveData, padx=50, pady=10, font=("Helvetica", "16"), bd=5) 
-        self.update_btn.grid(column=0, row=3, pady=(5,10))
+        self.update_btn.grid(column=0, row=4, pady=(5,10))
 
         self.output_dirs = [NONE_PATH, RED_PATH, BLUE_PATH, GREEN_PATH, YELLOW_PATH]
 
@@ -173,10 +189,57 @@ class SmashCSS_GUI(tk.Tk):
         # For future development
         # Allow users to choose output directory
         # Make application remember output settings and checkbox values
+        print("Loading settings...")
         try:
-            pass # load application settings
+            with open(self.getPath(SETTINGS_PATH)) as f:
+                settings = json.load(f)
+
+            self.configureSettings(settings)
+            print("Application settings loaded.")
+        except FileNotFoundError:
+            settings = {"icon_width": DEFAULT_ICON_GRID_WIDTH}
+
+            self.configureSettings(settings)
+
+            self.saveSettings(self.getPath(SETTINGS_PATH))
+            print("Created new settings data.")
         except Exception as e:
-            pass
+            print("Could not load application settings.")
+            print(type(e))
+            quit()
+
+    def getSettings(self) -> dict:
+        """
+        Create dictionary based on current settings
+        """
+        settings = {"icon_width": self.icon_grid_width}
+
+        return settings
+
+    def configureSettings(self, settings: dict) -> None:
+        """
+        Sets all of the application settings as specified in the provided dictionary
+        """
+        self.icon_grid_width = settings["icon_width"]
+
+    def saveSettings(self, out_file: os.PathLike) -> None:
+        """
+        Saves application settings at specified out_file location
+        """
+        with open(out_file, 'w') as f:
+            json.dump(self.getSettings(), f, indent=2)
+            print("Application settings saved.")
+
+    def updateSettings(self, attr: str) -> None:
+        """
+        Update settings when a change is made in the GUI
+        """
+
+        if (attr == "icon_width"):
+            try:
+                self.icon_grid_width = int(self.icon_width_var.get())
+            except ValueError:
+                self.icon_grid_width = 1
 
     def createButtons(self) -> list[tk.Button]:
         """
@@ -240,7 +303,7 @@ class SmashCSS_GUI(tk.Tk):
 
             img_list = getIcons(self.getPath(ICON_PATH), draw_list)
 
-            output = createImageGrid(img_list, int(len(img_list)/ICON_GRID_WIDTH) + 1, ICON_GRID_WIDTH)
+            output = createImageGrid(img_list, int(len(img_list)/self.icon_grid_width) + 1, self.icon_grid_width)
             saveImageGrid(self.getPath(self.output_dirs[team_color.value]), output)
 
     def saveData(self) -> None:
@@ -254,3 +317,5 @@ class SmashCSS_GUI(tk.Tk):
 
         self.updateImages()
         saveCharacterData(self.getPath(CHAR_DATA_PATH), self.character_list)
+
+        self.saveSettings(self.getPath(SETTINGS_PATH))
